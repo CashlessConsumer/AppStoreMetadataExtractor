@@ -7,7 +7,7 @@ import pprint
 def getAppListAndMetadata():
 	with open('../input/UPIAppList.tsv','r') as f:
 		for line in f.readlines():
-			getMetadata(line.split('\t')[0].split('=')[1], line.split('\t')[1])
+			getMetadata(line.split('\t')[0].split('=')[1], line.split('\t')[1].split('\n'))
 
 def main():
 	#getAppListAndMetadata()
