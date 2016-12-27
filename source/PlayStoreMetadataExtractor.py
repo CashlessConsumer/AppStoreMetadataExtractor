@@ -1,6 +1,8 @@
+import os
 import pycurl
-import simplejson
+import json
 import configparser
+import pprint
 
 def getAppListAndMetadata():
 	with open('../input/UPIAppList.tsv','r') as f:
@@ -8,10 +10,19 @@ def getAppListAndMetadata():
 			getMetadata(line.split('\t')[0].split('=')[1], line.split('\t')[1])
 
 def main():
-	getAppListAndMetadata()
+	#getAppListAndMetadata()
 	#ParseUsableMetadata()
-	#PermissionListExtractor()
+	PermissionListExtractor()
 	#UpdateGoogleSheets()
+
+def PermissionListExtractor():
+	for filename in os.listdir('../output/'):
+		print filename
+		with open('../output/'+filename) as f:
+			data = json.loads(f.read())
+			#print data['content']
+			pprint(data['content']["developer"]["name"])
+			pprint(data['content']["ratings"]["average"])
 
 def getMetadata(application_id,application_name):
 	print 'Get metadata using AppTweak'
