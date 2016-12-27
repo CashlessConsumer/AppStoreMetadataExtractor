@@ -2,7 +2,7 @@ import os
 import pycurl
 import json
 import configparser
-import pprint
+import csv
 
 def getAppListAndMetadata():
 	with open('../input/UPIAppList.tsv','r') as f:
@@ -12,17 +12,32 @@ def getAppListAndMetadata():
 def main():
 	#getAppListAndMetadata()
 	#ParseUsableMetadata()
-	PermissionListExtractor()
+	RatingsSummary()
+	#PermissionListExtractor()
 	#UpdateGoogleSheets()
 
 def PermissionListExtractor():
-	for filename in os.listdir('../output/'):
-		print filename
-		with open('../output/'+filename) as f:
-			data = json.loads(f.read())
-			#print data['content']
-			pprint(data['content']["developer"]["name"])
-			pprint(data['content']["ratings"]["average"])
+	return
+
+def RatingsSummary():
+	with open('../output/RatingSummary.csv', 'wb') as csvfile:
+		ratingwriter = csv.writer(csvfile, delimiter=',')
+		for filename in os.listdir('../output/'):
+			with open('../output/'+filename) as f:
+				data = json.loads(f.read())
+				developer = data["content"]["developer"]["name"]
+				app_name = data["content"]["store_info"]["title"]
+				average =  data["content"]["ratings"]["average"]
+				ratingcount = data["content"]["ratings"]["count"]
+				rating1count = data["content"]["ratings"]["star_count"]["1"]
+				rating2count = data["content"]["ratings"]["star_count"]["2"]
+				rating3count = data["content"]["ratings"]["star_count"]["3"]
+				rating4count = data["content"]["ratings"]["star_count"]["4"]
+				rating5count = data["content"]["ratings"]["star_count"]["5"]
+
+				ratingwriter.writerow(app_name,developer,average,ratingcount,rating1count,rating2count,rating3count,rating4count,rating5count)
+				ratingwriter.writerow(['Spam', 'Lovely Spam', 'Wonderful Spam'])
+
 
 def getMetadata(application_id,application_name):
 	print 'Get metadata using AppTweak'
