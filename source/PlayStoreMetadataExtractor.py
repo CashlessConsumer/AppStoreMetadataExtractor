@@ -1,4 +1,5 @@
 import os
+import codecs
 import pycurl
 import json
 import configparser
@@ -20,9 +21,12 @@ def PermissionListExtractor():
 	return
 
 def RatingsSummary():
-	with open('../output/RatingSummary.csv', 'wb') as csvfile:
-		ratingwriter = csv.writer(csvfile, delimiter=',')
+	with codecs.open('../RatingSummary.csv', 'w','utf-8') as csvfile:
+		fieldnames = ['name', 'title', 'average', 'count', 'star_count_1', 'star_count_2', 'star_count_3', 'star_count_4', 'star_count_5']
+		ratingwriter = csv.DictWriter(csvfile, delimiter=',', fieldnames=fieldnames)
+		ratingwriter.writeheader()
 		for filename in os.listdir('../output/'):
+			#print filename
 			with open('../output/'+filename) as f:
 				data = json.loads(f.read())
 				developer = data["content"]["developer"]["name"]
@@ -34,13 +38,11 @@ def RatingsSummary():
 				rating3count = data["content"]["ratings"]["star_count"]["3"]
 				rating4count = data["content"]["ratings"]["star_count"]["4"]
 				rating5count = data["content"]["ratings"]["star_count"]["5"]
-
-				ratingwriter.writerow(app_name,developer,average,ratingcount,rating1count,rating2count,rating3count,rating4count,rating5count)
-				ratingwriter.writerow(['Spam', 'Lovely Spam', 'Wonderful Spam'])
-
+				print(app_name,developer,average,ratingcount,rating1count,rating2count,rating3count,rating4count,rating5count)
+				ratingwriter.writerow({'title':app_name,'name':developer,'average':average,'count':ratingcount,'star_count_1':rating1count,'star_count_2':rating2count,'star_count_3':rating3count,'star_count_4':rating4count,'star_count_5':rating5count})
 
 def getMetadata(application_id,application_name):
-	print 'Get metadata using AppTweak'
+	print('Get metadata using AppTweak')
 	apptweak_base_url = 'https://api.apptweak.com/android/applications/'
 	request_suffix = '.json?country=in&language=en'
 
