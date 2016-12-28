@@ -13,11 +13,20 @@ def getAppListAndMetadata():
 def main():
 	#getAppListAndMetadata()
 	#ParseUsableMetadata()
-	RatingsSummary()
-	#PermissionListExtractor()
+	#RatingsSummary()
+	PermissionListExtractor()
 	#UpdateGoogleSheets()
 
 def PermissionListExtractor():
+	with codecs.open('../PermissionSummary.csv', 'w','utf-8') as csvfile:
+		fieldnames = ['title','count','permission']
+		permissionwriter = csv.DictWriter(csvfile, delimiter=',', fieldnames=fieldnames)
+		for filename in os.listdir('../output/'):
+			with open('../output/'+filename) as f:
+				data = json.loads(f.read())
+				title = data["content"]["store_info"]["title"]
+				permissions = data["content"]["store_info"]['permissions']
+				permissionwriter.writerow({'title':title,'count':len(permissions),'permission':','.join(permissions)})
 	return
 
 def RatingsSummary():
