@@ -12,15 +12,35 @@ def getAppListAndMetadata():
 
 def main():
 	#getAppListAndMetadata()
-	#ParseUsableMetadata()
+	ParseUsableMetadata()
 	#RatingsSummary()
-	PermissionListExtractor()
+	#PermissionListExtractor()
 	#UpdateGoogleSheets()
+
+def ParseUsableMetadata():
+	with codecs.open('../MetadataSummary.csv', 'w','utf-8') as csvfile:
+		fieldnames = ['Title','Name','Developer Email','Developer Website','App Size', 'App version', 'Last Release date']
+		metadatawriter = csv.DictWriter(csvfile, delimiter=',', fieldnames=fieldnames)
+		metadatawriter.writeheader()
+		for filename in os.listdir('../output/'):
+			with open('../output/'+filename) as f:
+				data = json.loads(f.read())
+				title = data["content"]["store_info"]["title"]
+				dev_name = data["content"]["developer"]["name"]
+				dev_email = data["content"]["developer"]["email"]
+				dev_site = data["content"]["developer"]["website"]
+				app_size = data["content"]["store_info"]["size"]["current"]["data"] / (1024 * 1024)
+				app_version = data["content"]["store_info"]["versions"][0]["version"]
+				app_release_date = data["content"]["store_info"]["versions"][0]["release_date"]
+
+				metadatawriter.writerow({'Title':title,'Name':dev_name,'Developer Email':dev_email, 'Developer Website':dev_site, 'App Size':app_size, 'App version' : app_version, 'Last Release date':app_release_date})
+	return
 
 def PermissionListExtractor():
 	with codecs.open('../PermissionSummary.csv', 'w','utf-8') as csvfile:
 		fieldnames = ['title','count','permission']
 		permissionwriter = csv.DictWriter(csvfile, delimiter=',', fieldnames=fieldnames)
+		permissionwriter.writeheader()
 		for filename in os.listdir('../output/'):
 			with open('../output/'+filename) as f:
 				data = json.loads(f.read())
