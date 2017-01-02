@@ -1,3 +1,4 @@
+import io
 import os
 import codecs
 import pycurl
@@ -6,15 +7,15 @@ import configparser
 import csv
 
 def getAppListAndMetadata():
-	with open('../input/UPIAppList.tsv','r') as f:
+	with open('../input/UPIAppList-Sample.tsv','r') as f:
 		for line in f.readlines():
-			getMetadata(line.split('\t')[0].split('=')[1], line.split('\t')[1].split('\n'))
+			getMetadata(line.split('\t')[0].split('=')[1], line.split('\t')[1].split('\n')[0])
 
 def main():
-	#getAppListAndMetadata()
+	getAppListAndMetadata()
 	ParseUsableMetadata()
-	#RatingsSummary()
-	#PermissionListExtractor()
+	RatingsSummary()
+	PermissionListExtractor()
 	#UpdateGoogleSheets()
 
 def ParseUsableMetadata():
@@ -81,7 +82,7 @@ def getMetadata(application_id,application_name):
 	APPTWEAK_API_KEY = config.get('DEFAULT','APPTWEAK_API_KEY')
 	c = pycurl.Curl()
 
-	with open('../output/' + application_name + '.json', 'w') as f:
+	with open('../output/' + application_id + '.json', 'wb') as f:
 		c.setopt(pycurl.URL, request_url)
 		c.setopt(pycurl.HTTPHEADER, ['X-Apptweak-Key: ' + APPTWEAK_API_KEY,'Accept: application/json'])
 		c.setopt(c.WRITEFUNCTION, f.write)
