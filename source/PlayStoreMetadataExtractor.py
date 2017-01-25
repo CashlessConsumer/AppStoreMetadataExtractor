@@ -1,4 +1,5 @@
 import io
+import datetime
 import os
 import codecs
 import pycurl
@@ -7,34 +8,40 @@ import configparser
 import csv
 
 def getAppListAndMetadata():
-	with open('../input/UPIAppList-Sample.tsv','r') as f:
+	with open('../input/UPIAppList.tsv','r') as f:
 		for line in f.readlines():
 			getMetadata(line.split('\t')[0].split('=')[1], line.split('\t')[1].split('\n')[0])
+			#print line.split('\t')[0].split('=')[1], line.split('\t')[1].split('\n')[0]
 
 def main():
-	getAppListAndMetadata()
+	#getAppListAndMetadata()
 	ParseUsableMetadata()
-	RatingsSummary()
-	PermissionListExtractor()
+	#RatingsSummary()
+	#PermissionListExtractor()
 	#UpdateGoogleSheets()
+
+#def CreateMasterJSON():
+
 
 def ParseUsableMetadata():
 	with codecs.open('../MetadataSummary.csv', 'w','utf-8') as csvfile:
-		fieldnames = ['Title','Name','Developer Email','Developer Website','App Size', 'App version', 'Last Release date']
+		fieldnames = ['Title','Name','Developer Email','Developer Website','App Size', 'App version', 'Last Release date','App Vintage', 'Number of Updates']
 		metadatawriter = csv.DictWriter(csvfile, delimiter=',', fieldnames=fieldnames)
 		metadatawriter.writeheader()
 		for filename in os.listdir('../output/'):
-			with open('../output/'+filename) as f:
+			with codecs.open('../output/'+filename,'r','utf-8') as f:
 				data = json.loads(f.read())
 				title = data["content"]["store_info"]["title"]
 				dev_name = data["content"]["developer"]["name"]
 				dev_email = data["content"]["developer"]["email"]
 				dev_site = data["content"]["developer"]["website"]
 				app_size = data["content"]["store_info"]["size"]["current"]["data"] / (1024 * 1024)
-				app_version = data["content"]["store_info"]["versions"][0]["version"]
+				app_version = data["content"]["store_info"]["versions"][0]["version"]				
 				app_release_date = data["content"]["store_info"]["versions"][0]["release_date"]
+				app_vintage = (datetime.datetime.now().date() - datetime.datetime.strptime(app_release_date.split(' ')[0], "%Y-%m-%d").date()).days
+				number_of_updates = len(data["content"]["store_info"]["versions"])
 
-				metadatawriter.writerow({'Title':title,'Name':dev_name,'Developer Email':dev_email, 'Developer Website':dev_site, 'App Size':app_size, 'App version' : app_version, 'Last Release date':app_release_date})
+				metadatawriter.writerow({'Title':title,'Name':dev_name,'Developer Email':dev_email, 'Developer Website':dev_site, 'App Size':app_size, 'App version' : app_version, 'Last Release date':app_release_date,'App Vintage':app_vintage,'Number of Updates':number_of_updates})
 	return
 
 def PermissionListExtractor():
